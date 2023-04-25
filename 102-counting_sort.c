@@ -1,92 +1,60 @@
 #include "sort.h"
-
+#include <stdio.h>
 /**
- * list_len - function returns the length of list
- * @list: head of the list
- *
- * Return: length
+ *_calloc - this is a calloc function
+ *@nmemb: number of elemets
+ *@size: bit size of each element
+ *Return: pointer to memory assignement
  */
-
-size_t list_len(listint_t *list)
+void *_calloc(unsigned int nmemb, unsigned int size)
 {
-	size_t len = 0;
+	unsigned int i = 0;
+	char *p;
 
-	while (list)
-	{
-		len++;
-		list = list->next;
-	}
-	return (len);
+	if (nmemb == 0 || size == 0)
+		return ('\0');
+	p = malloc(nmemb * size);
+	if (p == '\0')
+		return ('\0');
+	for (i = 0; i < (nmemb * size); i++)
+		p[i] = '\0';
+	return (p);
 }
-
 /**
- * switch_nodes - function swaps nodes at pointer p with the following node
- * @list: head of the list
- * @p: pointer to node
+ * counting_sort - this is a counting sort method implementation
+ * @array: array to sort
+ * @size: array size
  */
-
-void switch_nodes(listint_t **list, listint_t **p)
+void counting_sort(int *array, size_t size)
 {
-	listint_t *one, *two, *three, *four;
+	int index, maximun = 0, *counter = '\0', *tmp = '\0';
+	size_t i;
 
-	one = (*p)->prev;
-	two = *p;
-	three = (*p)->next;
-	four = (*p)->next->next;
-	two->next = four;
-	if (four)
-		four->prev = two;
-	three->next = two;
-	three->prev = two->prev;
-	if (one)
-		one->next = three;
-	else
-		*list = three;
-	two->prev = three;
-	*p = three;
-}
-
-/**
- *  cocktail_sort_list - function sorts a doubly linked list using
- * the cocktail sort algorithm
- * @list: pointer to list
- */
-void cocktail_sort_list(listint_t **list)
-{
-	listint_t *p;
-	int sorted = 0;
-
-	if (!list || !*list || list_len(*list) < 2)
+	if (array == '\0' || size < 2)
 		return;
-	p = *list;
-	while (!sorted)
+	/* find maximun number */
+	for (i = 0; i < size; i++)
+		if (array[i] > maximun)
+			maximun = array[i];
+	counter = _calloc(maximun + 1, sizeof(int));
+	tmp = _calloc(size + 1, sizeof(int));
+	/* count the array elements */
+	for (i = 0; i < size; i++)
+		counter[array[i]]++;
+	/* get the accumulative values */
+	for (index = 1; index <= maximun; index++)
+		counter[index] += counter[index - 1];
+	print_array(counter, maximun + 1);
+	/* get the new array sorted */
+	for (i = 0; i < size; ++i)
 	{
-		sorted = 1;
-		while (p->next)
-		{
-			if (p->n > p->next->n)
-			{
-				sorted = 0;
-				switch_nodes(list, &p);
-				print_list(*list);
-			}
-			else
-				p = p->next;
-		}
-		if (sorted)
-			break;
-		p = p->prev;
-		while (p->prev)
-		{
-			if (p->n < p->prev->n)
-			{
-				sorted = 0;
-				p = p->prev;
-				switch_nodes(list, &p);
-				print_list(*list);
-			}
-			else
-				p = p->prev;
-		}
+		tmp[counter[array[i]] - 1] = array[i];
+		counter[array[i]]--;
 	}
+	/* replace old array to new array sorted */
+	for (i = 0; i < size; i++)
+		array[i] = tmp[i];
+	free(tmp);
+	free(counter);
+
 }
